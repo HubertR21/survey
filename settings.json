@@ -1,0 +1,39 @@
+{
+    "imputation_output_dir": "output/results",
+    "iterations": 10,
+    "experiment_name": "example_experiment",
+    "na_fractions": [
+        0.05,
+        0.1,
+        0.15,
+        0.2,
+        0.25,
+        0.3
+    ],
+    "data": [
+        {
+            "name": "iris",
+            "path": "data/iris.csv",
+            "ignore": false,
+            "incomplete_column": "SepalLengthCm",
+            "target_column": "Species",
+            "number_of_clusters": 3,
+            "knn_number_of_neighbors": [
+                5
+            ],
+            "knn_weight_functions": [
+                "const",
+                "1/x",
+                "1/x**2"
+            ],
+            "reference_columns": [
+                "SepalWidthCm",
+                "PetalLengthCm",
+                "PetalWidthCm"
+            ],
+            "categorical_columns": [
+                "Species"
+            ]
+        }
+    ]
+}

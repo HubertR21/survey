@@ -20,6 +20,7 @@ plotly = "^5.3.1"
 sklearn = "^0.0"
 gspread = "^5.1.1"
 gsheetsdb = "^0.1.13"
+umap-learn = "^0.5.2"
 
 
 [build-system]

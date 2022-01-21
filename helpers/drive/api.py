@@ -25,12 +25,6 @@ class GSAuthentication:
 
         return cls._instance
 
-
-# TODO: remove mock
-def get_registered_ids():
-    return ["1", "2"]
-
-
 def save_results(g, y_pred_uncertain, annotator_id, seed, dataset_name, na_fraction):
     gsheet = g.gc.open_by_url(g.url)
     datasets = {"iris": 0, "wola": 1, "stamp_type": 2}
