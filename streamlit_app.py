@@ -2,7 +2,7 @@ import streamlit as st
 import json
 import time
 
-from helpers.drive.api import GSAuthentication
+from helpers.drive.api import GSAuthentication, download_datasets
 from helpers.utils.dataset import generate_incomplete_dataset, get_df_incomplete, save_results, find_uncertain_y_indexes
 from helpers.utils.projections import projections_dict, plot_scatter
 from sklearn.cluster import KMeans
@@ -15,7 +15,7 @@ def validate(user_id):
     return validated
 
 
-def calculate_y_pred_uncertain():
+def calculate_y_pred_uncertain(df_incomplete):
     X = df_incomplete[reference_columns].values
 
     kmeans = KMeans(n_clusters=number_of_clusters, random_state=0)
@@ -41,8 +41,6 @@ st.sidebar.markdown('## Authorization')
 user_id = st.sidebar.text_input('Your ID')
 user_password = st.sidebar.text_input('Password', type="password")
 
-st.session_state["gsheet"] = GSAuthentication()
-
 if not validate(user_id) or not user_password == st.secrets['password']:
     '# Please authorize'
     'Please provide your ID and password in a sidebar inputs.'
@@ -52,6 +50,12 @@ else:
 
     datasets_settings = settings['data']
 
+    if 'gsheet' not in st.session_state:
+        st.session_state["gsheet"] = GSAuthentication()
+    if 'data' not in st.session_state:
+        with st.spinner(text="In progress..."):
+            download_datasets(st.session_state["gsheet"], [dataset['name'] for dataset in datasets_settings])
+            st.session_state['data'] = True
     if 'started' not in st.session_state:
         st.session_state['started'] = False
     if 'annotated_points' not in st.session_state:
@@ -74,10 +78,10 @@ else:
             st.session_state['dataset_generation_seed'] = int(time.time())
 
         df_incomplete = generate_incomplete_dataset(st.session_state['dataset_generation_seed'],
-                                                    dataset_settings['path'],
+                                                    dataset_settings['name'],
                                                     incomplete_column,
                                                     na_fraction_selectbox)
-        update_session_state(*calculate_y_pred_uncertain())
+        update_session_state(*calculate_y_pred_uncertain(df_incomplete))
         st.session_state['started'] = True
 
     if st.session_state['started']:
@@ -128,6 +132,8 @@ else:
 
                 st.success('Your answers have been saved')
                 st.balloons()
+                time.sleep(2)
+
                 st.experimental_rerun()
         except ValueError:
             st.error("Click START after changing the dataset to restart the annotation process")

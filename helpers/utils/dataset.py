@@ -7,8 +7,8 @@ from helpers.drive import api
 
 
 @st.cache(allow_output_mutation=True)
-def generate_incomplete_dataset(seed, dataset_path, incomplete_column, na_frac) -> pd.DataFrame:
-    df = pd.read_csv(dataset_path)
+def generate_incomplete_dataset(seed, name, incomplete_column, na_frac) -> pd.DataFrame:
+    df = st.session_state[f'ds_{name}']
     na_indexes = df.sample(frac=na_frac, random_state=seed).index
     df.loc[na_indexes, incomplete_column] = np.NaN
     return df
@@ -16,7 +16,7 @@ def generate_incomplete_dataset(seed, dataset_path, incomplete_column, na_frac) 
 
 def get_df_incomplete(projection_key, X, dataset_settings, na_fraction_selectbox):
     df = generate_incomplete_dataset(st.session_state['dataset_generation_seed'],
-                                     dataset_settings['path'],
+                                     dataset_settings['name'],
                                      dataset_settings['incomplete_column'],
                                      na_fraction_selectbox)
     X_projected = projections_dict[projection_key](X)

@@ -15,6 +15,7 @@ class GSAuthentication:
                 st.secrets["gcp_service_account"],
                 scopes=[
                     "https://www.googleapis.com/auth/spreadsheets",
+                    "https://www.googleapis.com/auth/drive.readonly",
                 ],
             )
             print("created")
@@ -24,6 +25,20 @@ class GSAuthentication:
             cls.url = st.secrets['private_gsheets_url']
 
         return cls._instance
+
+
+def download_datasets(g, names):
+    for name in names:
+        gsheet = g.gc.open(name, st.secrets['private_data_folder_id'])
+        data = gsheet.sheet1.get_all_values()
+        df = pd.DataFrame(data[1:], columns=data[0])
+        for col in df.columns:
+            try:
+                df[col] = pd.to_numeric(df[col])
+            except ValueError:
+                pass
+        st.session_state[f'ds_{name}'] = df
+
 
 def save_results(g, y_pred_uncertain, annotator_id, seed, dataset_name, na_fraction):
     gsheet = g.gc.open_by_url(g.url)
