@@ -46,7 +46,7 @@ def plot_scatter(df, incomplete_column, current_null_index):
                      range_x=[uncertain_x - df['x'].std(), uncertain_x + df['x'].std()],
                      range_y = [uncertain_y - df['y'].std(), uncertain_y + df['y'].std()],
                      # hover_name=target_column,
-                        height=800
+                        height=700
                      )
     fig.update_traces(textposition='top center', textfont_size=8, textfont_color="#636363")
     fig.layout.showlegend = False

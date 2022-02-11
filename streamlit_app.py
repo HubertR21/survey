@@ -84,7 +84,10 @@ else:
                                                     incomplete_column,
                                                     na_fraction_selectbox)
         update_session_state(*calculate_y_pred_uncertain(df_incomplete))
-        st.session_state['started'] = True
+        if None not in st.session_state['y_pred_uncertain']:
+            'Sorry, there are no border points to annotate. Choose other dataset or na_fraction.'
+        else:
+            st.session_state['started'] = True
 
     if st.session_state['started']:
         with st.sidebar:
@@ -132,10 +135,9 @@ else:
                 st.session_state['annotated_points'] = 0
                 st.session_state['started'] = False
                 st.session_state['dataset_generation_seed'] = int(time.time())
-
                 st.success('Your answers have been saved')
                 st.balloons()
-                time.sleep(2)
+                time.sleep(1.5)
 
                 st.experimental_rerun()
         except ValueError:
