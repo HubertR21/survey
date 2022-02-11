@@ -4,17 +4,20 @@ from sklearn.decomposition import PCA
 import streamlit as st
 import plotly.express as px
 
+
 @st.cache
 def perform_pca_projection(X):
     tsne = PCA(n_components=2, random_state=0)
     X_projected = tsne.fit_transform(X)
     return X_projected
 
+
 @st.cache
 def perform_umap_projection(X):
     umap_2d = UMAP(n_components=2, init='random', random_state=0)
     X_projected = umap_2d.fit_transform(X)
     return X_projected
+
 
 @st.cache
 def perform_tsne_projection(X):
@@ -31,16 +34,24 @@ projections_dict = {
 
 
 def plot_scatter(df, incomplete_column, current_null_index):
-    fig = px.scatter(df.sort_values(by=['y_pred']), x="x", y="y",
+    uncertain_x, uncertain_y = df[['x', 'y']].loc[current_null_index]
+
+    fig = px.scatter(df, x="x", y="y",
                      color=incomplete_column,
                      symbol="y_pred",
-                     #hover_name=target_column,
-                     width=1000, height=800)
-    fig.layout.legend.y = 1
-    fig.layout.legend.x = 1.2
-    uncertain_x, uncertain_y = df[['x', 'y']].loc[current_null_index]
+                     symbol_sequence=["circle", "square", "diamond", "cross", "triangle-up", "triangle-down",
+                                      "pentagon", "circle-cross", "square-cross", "diamond-cross"],
+                     symbol_map={"uncertain": "x"},
+                     text='y_pred',
+                     range_x=[uncertain_x - df['x'].std(), uncertain_x + df['x'].std()],
+                     range_y = [uncertain_y - df['y'].std(), uncertain_y + df['y'].std()],
+                     # hover_name=target_column,
+                        height=700
+                     )
+    fig.update_traces(textposition='top center', textfont_size=8, textfont_color="#636363")
+    fig.layout.showlegend = False
     add_annotation(fig, uncertain_x, uncertain_y)
-    st.plotly_chart(fig)
+    st.plotly_chart(fig, use_container_width=True)
 
 
 def add_annotation(fig, x, y):

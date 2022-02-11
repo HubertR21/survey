@@ -22,8 +22,10 @@ def calculate_y_pred_uncertain(df_incomplete):
     kmeans.fit(X)
     y_pred = kmeans.predict(X)
 
-    uncertain_y_indexes = find_uncertain_y_indexes(X, number_of_clusters)
-    y_pred_uncertain = [int(el) if i not in uncertain_y_indexes else None for i, el in enumerate(y_pred)]
+    uncertain_y_indexes = find_uncertain_y_indexes(X, number_of_clusters, fuzzy_certainty_thres=0.6)
+    incomplete_indexes = df_incomplete[df_incomplete[incomplete_column].isnull()].index.tolist()
+    uncertain_incomplete_y_indexes = set(uncertain_y_indexes).intersection(incomplete_indexes)
+    y_pred_uncertain = [int(el) if i not in uncertain_incomplete_y_indexes else None for i, el in enumerate(y_pred)]
     return X, y_pred_uncertain
 
 
@@ -43,7 +45,7 @@ user_password = st.sidebar.text_input('Password', type="password")
 
 if not validate(user_id) or not user_password == st.secrets['password']:
     '# Please authorize'
-    'Please provide your ID and password in a sidebar inputs.'
+    'Please provide your ID and password in the sidebar inputs.'
 else:
     with open("settings.json", "r") as f:
         settings = json.load(f)
@@ -82,10 +84,14 @@ else:
                                                     incomplete_column,
                                                     na_fraction_selectbox)
         update_session_state(*calculate_y_pred_uncertain(df_incomplete))
-        st.session_state['started'] = True
+        if None not in st.session_state['y_pred_uncertain']:
+            'Sorry, there are no border points to annotate. Choose other dataset or na_fraction.'
+        else:
+            st.session_state['started'] = True
 
     if st.session_state['started']:
-        projection_key = st.selectbox('Set projection', projections_dict.keys())
+        with st.sidebar:
+            projection_key = st.selectbox('Set projection', projections_dict.keys())
         try:
             df_incomplete = get_df_incomplete(str(projection_key), st.session_state.X, dataset_settings,
                                               na_fraction_selectbox)
@@ -102,15 +108,15 @@ else:
 
                 df_incomplete.at[current_null_index, 'y_pred'] = 'uncertain'
                 df_to_show = df_incomplete[df_incomplete['y_pred'].notnull()]
-                plot_scatter(df_to_show, incomplete_column, current_null_index)
 
+                plot_scatter(df_to_show, incomplete_column, current_null_index)
                 with st.sidebar:
                     f"Records to be labeled: {len(df_null_indexes)}"
                     st.progress(
                         st.session_state['annotated_points'] / (
                                 st.session_state['annotated_points'] + n_of_points_to_annotate))
-
-                    uncertain_label = st.radio('Select label for uncertain record', cluster_labels)
+                    cluster_labels.sort(key=int)
+                    uncertain_label = st.selectbox('Select label for uncertain record', cluster_labels)
                     if st.button('Submit'):
                         st.session_state['y_pred_uncertain'][current_null_index] = int(uncertain_label)
                         st.session_state['annotated_points'] += 1
@@ -129,10 +135,9 @@ else:
                 st.session_state['annotated_points'] = 0
                 st.session_state['started'] = False
                 st.session_state['dataset_generation_seed'] = int(time.time())
-
                 st.success('Your answers have been saved')
                 st.balloons()
-                time.sleep(2)
+                time.sleep(1.5)
 
                 st.experimental_rerun()
         except ValueError:
