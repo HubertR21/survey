@@ -22,8 +22,10 @@ def calculate_y_pred_uncertain(df_incomplete):
     kmeans.fit(X)
     y_pred = kmeans.predict(X)
 
-    uncertain_y_indexes = find_uncertain_y_indexes(X, number_of_clusters)
-    y_pred_uncertain = [int(el) if i not in uncertain_y_indexes else None for i, el in enumerate(y_pred)]
+    uncertain_y_indexes = find_uncertain_y_indexes(X, number_of_clusters, fuzzy_certainty_thres=0.6)
+    incomplete_indexes = df_incomplete[df_incomplete[incomplete_column].isnull()].index.tolist()
+    uncertain_incomplete_y_indexes = set(uncertain_y_indexes).intersection(incomplete_indexes)
+    y_pred_uncertain = [int(el) if i not in uncertain_incomplete_y_indexes else None for i, el in enumerate(y_pred)]
     return X, y_pred_uncertain
 
 
@@ -43,7 +45,7 @@ user_password = st.sidebar.text_input('Password', type="password")
 
 if not validate(user_id) or not user_password == st.secrets['password']:
     '# Please authorize'
-    'Please provide your ID and password in a sidebar inputs.'
+    'Please provide your ID and password in the sidebar inputs.'
 else:
     with open("settings.json", "r") as f:
         settings = json.load(f)
