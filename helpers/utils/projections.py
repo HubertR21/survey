@@ -34,6 +34,8 @@ projections_dict = {
 
 
 def plot_scatter(df, incomplete_column, current_null_index):
+    uncertain_x, uncertain_y = df[['x', 'y']].loc[current_null_index]
+
     fig = px.scatter(df, x="x", y="y",
                      color=incomplete_column,
                      symbol="y_pred",
@@ -41,14 +43,15 @@ def plot_scatter(df, incomplete_column, current_null_index):
                                       "pentagon", "circle-cross", "square-cross", "diamond-cross"],
                      symbol_map={"uncertain": "x"},
                      text='y_pred',
+                     range_x=[uncertain_x - df['x'].std(), uncertain_x + df['x'].std()],
+                     range_y = [uncertain_y - df['y'].std(), uncertain_y + df['y'].std()],
                      # hover_name=target_column,
-                     width=1000, height=800
+                        height=800
                      )
     fig.update_traces(textposition='top center', textfont_size=8, textfont_color="#636363")
     fig.layout.showlegend = False
-    uncertain_x, uncertain_y = df[['x', 'y']].loc[current_null_index]
     add_annotation(fig, uncertain_x, uncertain_y)
-    st.plotly_chart(fig)
+    st.plotly_chart(fig, use_container_width=True)
 
 
 def add_annotation(fig, x, y):

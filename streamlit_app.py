@@ -87,7 +87,8 @@ else:
         st.session_state['started'] = True
 
     if st.session_state['started']:
-        projection_key = st.selectbox('Set projection', projections_dict.keys())
+        with st.sidebar:
+            projection_key = st.selectbox('Set projection', projections_dict.keys())
         try:
             df_incomplete = get_df_incomplete(str(projection_key), st.session_state.X, dataset_settings,
                                               na_fraction_selectbox)
@@ -104,15 +105,15 @@ else:
 
                 df_incomplete.at[current_null_index, 'y_pred'] = 'uncertain'
                 df_to_show = df_incomplete[df_incomplete['y_pred'].notnull()]
-                plot_scatter(df_to_show, incomplete_column, current_null_index)
 
+                plot_scatter(df_to_show, incomplete_column, current_null_index)
                 with st.sidebar:
                     f"Records to be labeled: {len(df_null_indexes)}"
                     st.progress(
                         st.session_state['annotated_points'] / (
                                 st.session_state['annotated_points'] + n_of_points_to_annotate))
-
-                    uncertain_label = st.radio('Select label for uncertain record', cluster_labels)
+                    cluster_labels.sort(key=int)
+                    uncertain_label = st.selectbox('Select label for uncertain record', cluster_labels)
                     if st.button('Submit'):
                         st.session_state['y_pred_uncertain'][current_null_index] = int(uncertain_label)
                         st.session_state['annotated_points'] += 1
