@@ -45,7 +45,7 @@ def save_results(g, y_pred_uncertain, annotator_id, seed, dataset_name, na_fract
     datasets = {"iris": 0, "wola": 1, "stamp_type": 2}
     worksheet_number = datasets[dataset_name]
     wsheet = gsheet.get_worksheet(worksheet_number)
-    data = pd.DataFrame(gsheet.sheet1.get_all_values())
+    data = pd.DataFrame(wsheet.get_all_values())
     now = time.localtime(time.time())
     row_data = [
         time.strftime("%m/%d/%Y, %H:%M:%S", now),
