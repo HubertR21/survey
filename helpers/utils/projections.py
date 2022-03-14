@@ -39,22 +39,26 @@ def plot_scatter(df, incomplete_column, current_null_index):
     fig = px.scatter(df, x="x", y="y",
                      color=incomplete_column,
                      color_continuous_scale=px.colors.sequential.Inferno,
-                     symbol="y_pred",
-                     symbol_sequence=["circle", "square", "diamond", "cross", "triangle-up", "triangle-down",
-                                      "pentagon", "circle-cross", "square-cross", "diamond-cross"],
+                     # symbol="y_pred",
+                     # symbol_sequence=["circle", "square", "diamond", "cross", "triangle-up", "triangle-down",
+                     #                  "pentagon", "circle-cross", "square-cross", "diamond-cross"],
                      symbol_map={"uncertain": "x"},
-                     text='y_pred',
+                     # text='y_pred',
+                     hover_data={'x': False,
+                                 'y': False,
+                                 incomplete_column: ':.2f'
+                                 },
                      range_x=[uncertain_x - df['x'].std(), uncertain_x + df['x'].std()],
-                     range_y = [uncertain_y - df['y'].std(), uncertain_y + df['y'].std()],
+                     range_y=[uncertain_y - df['y'].std(), uncertain_y + df['y'].std()],
                      # hover_name=target_column,
-                        height=700,
-                     orientation='v'
+                     height=600,
                      )
     fig.update_traces(textposition='top center', textfont_size=8,
-                      textfont_color="#636363"
+                      textfont_color="#636363", marker_size=12
                       )
 
     fig.layout.showlegend = False
+    # fig.update_layout(hovermode="incomplete_column")
 
     add_annotation(fig, uncertain_x, uncertain_y)
     st.plotly_chart(fig, use_container_width=True)
@@ -62,7 +66,7 @@ def plot_scatter(df, incomplete_column, current_null_index):
     import matplotlib as mpl
 
     fig = plt.figure()
-    ax = fig.add_axes([0.05, 0.80, 0.9, 0.1])
+    ax = fig.add_axes([0, 0, 1, 0.05])
     inferno = mpl.cm.get_cmap('inferno', 256)
     cb = mpl.colorbar.ColorbarBase(ax, orientation='horizontal',
                                    cmap=inferno)
@@ -73,8 +77,7 @@ def plot_scatter(df, incomplete_column, current_null_index):
     # plt.yticks(y, labels=" ")
 
     st.slider("", float(df[incomplete_column].min()), float(df[incomplete_column].max()))
-    st.pyplot(fig)
-
+    st.pyplot(fig, use_container_width=True)
 
 
 def add_annotation(fig, x, y):
