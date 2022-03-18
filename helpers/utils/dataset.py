@@ -14,11 +14,7 @@ def generate_incomplete_dataset(seed, name, incomplete_column, na_frac) -> pd.Da
     return df
 
 
-def get_df_incomplete(projection_key, X, dataset_settings, na_fraction_selectbox):
-    df = generate_incomplete_dataset(st.session_state['dataset_generation_seed'],
-                                     dataset_settings['name'],
-                                     dataset_settings['incomplete_column'],
-                                     na_fraction_selectbox)
+def add_projection_dimensions_to_df_incomplete(projection_key, X, df):
     X_projected = projections_dict[projection_key](X)
     df['x'] = [el[0] for el in X_projected]
     df['y'] = [el[1] for el in X_projected]
