@@ -60,7 +60,7 @@ else:
                 plot_scatter(df_to_show, incomplete_column, current_null_index)
 
                 value = st.slider("", float(df_to_show[incomplete_column].min()), float(df_to_show[incomplete_column].max()),
-                                  step=0.1, key='my_slider',  on_change=update_point_color, args=[df_incomplete, incomplete_column])
+                                  step=dataset_settings['precision'], key='my_slider',  on_change=update_point_color, args=[df_incomplete, incomplete_column])
 
                 f"Records to be labeled: {len(df_null_indexes)}"
                 st.progress(
