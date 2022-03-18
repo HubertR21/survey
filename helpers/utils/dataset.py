@@ -8,7 +8,7 @@ from helpers.drive import api
 
 @st.cache(allow_output_mutation=True)
 def generate_incomplete_dataset(seed, name, incomplete_column, na_frac) -> pd.DataFrame:
-    df = st.session_state[f'ds_{name}']
+    df = st.session_state[f'ds_{name}'].copy(deep=True)
     na_indexes = df.sample(frac=na_frac, random_state=seed).index
     df.loc[na_indexes, incomplete_column] = np.NaN
     return df
