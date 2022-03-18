@@ -43,6 +43,11 @@ st.sidebar.markdown('## Authorization')
 user_id = st.sidebar.text_input('Your ID')
 user_password = st.sidebar.text_input('Password', type="password")
 
+
+def update_point_color():
+    df_incomplete.at[st.session_state['current_null_index'], incomplete_column] = st.session_state['my_slider']
+
+
 if not validate(user_id) or not user_password == st.secrets['password']:
     '# Please authorize'
     'Please provide your ID and password in the sidebar inputs.'
@@ -84,6 +89,8 @@ else:
                                                     incomplete_column,
                                                     na_fraction_selectbox)
         update_session_state(*calculate_y_pred_uncertain(df_incomplete))
+        st.session_state['annotator_error'] = 0
+        st.session_state['mean_error'] = 0
         if None not in st.session_state['y_pred_uncertain']:
             'Sorry, there are no border points to annotate. Choose other dataset or na_fraction.'
         else:
@@ -108,36 +115,46 @@ else:
 
                 df_incomplete.at[current_null_index, 'y_pred'] = 'uncertain'
                 df_to_show = df_incomplete[df_incomplete['y_pred'].notnull()]
-
+                st.session_state['current_null_index'] = current_null_index
                 plot_scatter(df_to_show, incomplete_column, current_null_index)
-                with st.sidebar:
-                    f"Records to be labeled: {len(df_null_indexes)}"
-                    st.progress(
-                        st.session_state['annotated_points'] / (
-                                st.session_state['annotated_points'] + n_of_points_to_annotate))
-                    cluster_labels.sort(key=int)
-                    uncertain_label = st.selectbox('Select label for uncertain record', cluster_labels)
-                    if st.button('Submit'):
-                        st.session_state['y_pred_uncertain'][current_null_index] = int(uncertain_label)
-                        st.session_state['annotated_points'] += 1
-                        st.experimental_rerun()
-                    if st.button('Cancel'):
-                        st.session_state['annotated_points'] = 0
-                        st.session_state['started'] = False
-                        st.experimental_rerun()
+
+                value = st.slider("", float(df_to_show[incomplete_column].min()), float(df_to_show[incomplete_column].max()),
+                                  step=0.1, key='my_slider',  on_change=update_point_color)
+
+                f"Records to be labeled: {len(df_null_indexes)}"
+                st.progress(
+                    st.session_state['annotated_points'] / (
+                            st.session_state['annotated_points'] + n_of_points_to_annotate))
+
+                if st.button('Submit'):
+                    real_value=st.session_state[f'ds_{dataset_settings["name"]}'].at[current_null_index, incomplete_column]
+                    st.session_state['annotator_error'] += abs(real_value - value)
+                    st.session_state['mean_error'] += abs(real_value - df_incomplete[incomplete_column].mean())
+
+                    st.session_state['y_pred_uncertain'][current_null_index] = int(0) # fix this hack
+                    st.session_state['annotated_points'] += 1
+                    st.experimental_rerun()
+                if st.button('Cancel'):
+                    st.session_state['annotated_points'] = 0
+                    st.session_state['started'] = False
+                    st.experimental_rerun()
+
             else:
                 # Iteration finished
-                save_results(st.session_state['y_pred_uncertain'],
-                             st.session_state['dataset_generation_seed'],
-                             dataset_name_selectbox,
-                             na_fraction_selectbox)
-
+                # save_results(st.session_state['y_pred_uncertain'],
+                #              st.session_state['dataset_generation_seed'],
+                #              dataset_name_selectbox,
+                #              na_fraction_selectbox)
+                print(f"Annotator error: {st.session_state['annotator_error']}")
+                print(f"Mean error: {st.session_state['mean_error']}")
+                f"Annotator error: {st.session_state['annotator_error']}"
+                f"Mean error: {st.session_state['mean_error']}"
                 st.session_state['annotated_points'] = 0
                 st.session_state['started'] = False
                 st.session_state['dataset_generation_seed'] = int(time.time())
                 st.success('Your answers have been saved')
                 st.balloons()
-                time.sleep(1.5)
+                time.sleep(3)
 
                 st.experimental_rerun()
         except ValueError:

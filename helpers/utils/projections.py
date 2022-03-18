@@ -52,6 +52,7 @@ def plot_scatter(df, incomplete_column, current_null_index):
                      range_y=[uncertain_y - df['y'].std(), uncertain_y + df['y'].std()],
                      # hover_name=target_column,
                      height=600,
+                     width=800
                      )
     fig.update_traces(textposition='top center', textfont_size=8,
                       textfont_color="#636363", marker_size=12
@@ -61,23 +62,10 @@ def plot_scatter(df, incomplete_column, current_null_index):
     # fig.update_layout(hovermode="incomplete_column")
 
     add_annotation(fig, uncertain_x, uncertain_y)
-    st.plotly_chart(fig, use_container_width=True)
-    import matplotlib.pyplot as plt
-    import matplotlib as mpl
+    st.plotly_chart(fig)
 
-    fig = plt.figure()
-    ax = fig.add_axes([0, 0, 1, 0.05])
-    inferno = mpl.cm.get_cmap('inferno', 256)
-    cb = mpl.colorbar.ColorbarBase(ax, orientation='horizontal',
-                                   cmap=inferno)
-    ax.axes.xaxis.set_ticklabels([])
-    # ax.axes.yaxis.set_ticklabels([])
-    ax.axes.xaxis.set_ticks([])
-    # plt.xticks(x, labels=" ")
-    # plt.yticks(y, labels=" ")
 
-    st.slider("", float(df[incomplete_column].min()), float(df[incomplete_column].max()))
-    st.pyplot(fig, use_container_width=True)
+
 
 
 def add_annotation(fig, x, y):
