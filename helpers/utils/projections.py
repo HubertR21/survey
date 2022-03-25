@@ -60,9 +60,8 @@ def plot_scatter(df, incomplete_column, current_null_index):
 
     fig.layout.showlegend = False
     # fig.update_layout(hovermode="incomplete_column")
-
     add_annotation(fig, uncertain_x, uncertain_y)
-    st.plotly_chart(fig)
+    scatter = st.plotly_chart(fig, key="scatter")
 
 
 

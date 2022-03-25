@@ -90,13 +90,14 @@ else:
                 print(f"Mean error: {st.session_state['mean_error']}")
                 f"Annotator error: {st.session_state['annotator_error']}"
                 f"Mean error: {st.session_state['mean_error']}"
-                st.session_state['annotated_points'] = 0
-                st.session_state['started'] = False
-                st.session_state['dataset_generation_seed'] = int(time.time())
-                st.success('Your answers have been saved')
-                st.balloons()
-                time.sleep(3)
+                if st.button("OK"):
+                    st.session_state['annotated_points'] = 0
+                    st.session_state['started'] = False
+                    st.session_state['dataset_generation_seed'] = int(time.time())
+                    # st.success('Your answers have been saved')
+                    st.balloons()
+                    time.sleep(1)
 
-                st.experimental_rerun()
+                    st.experimental_rerun()
         except ValueError:
             st.error("Click START after changing the dataset to restart the annotation process")
