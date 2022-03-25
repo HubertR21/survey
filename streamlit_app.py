@@ -56,7 +56,10 @@ else:
                 cluster_labels = [el for el in df_incomplete['y_pred'].unique() if el is not None]
 
                 df_incomplete.at[current_null_index, 'y_pred'] = 'uncertain'
-                df_to_show = df_incomplete[df_incomplete['y_pred'].notnull()]
+                points_to_show_mask = df_incomplete[incomplete_column].notnull()
+                points_to_show_mask[current_null_index] = True
+                df_to_show = df_incomplete[points_to_show_mask]
+
                 st.session_state['current_null_index'] = current_null_index
                 plot_scatter(df_to_show, incomplete_column, reference_columns, current_null_index)
 

@@ -36,8 +36,8 @@ projections_dict = {
 def plot_scatter(df, incomplete_column, reference_columns, current_null_index):
     uncertain_x, uncertain_y = df[['x', 'y']].loc[current_null_index]
 
-    hover_data = {col: True for col in df[reference_columns].columns}
-    hover_data.update({'x': False, 'y': False, incomplete_column: ':.2f'})
+    hover_data = {'x': False, 'y': False, incomplete_column: ':.2f'}
+    hover_data.update({col: True for col in df[reference_columns].columns})
 
     fig = px.scatter(df, x="x", y="y",
                      color=incomplete_column,
