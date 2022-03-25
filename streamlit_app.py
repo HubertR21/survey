@@ -32,6 +32,7 @@ else:
 
     dataset_settings = next(dataset for dataset in datasets_settings if dataset['name'] == dataset_name_selectbox)
     incomplete_column = dataset_settings['incomplete_column']
+    reference_columns = dataset_settings['reference_columns']
 
     if st.sidebar.button('START'):
         st.session_state.df_incomplete = init_new_annotation_task(dataset_settings)
@@ -57,7 +58,7 @@ else:
                 df_incomplete.at[current_null_index, 'y_pred'] = 'uncertain'
                 df_to_show = df_incomplete[df_incomplete['y_pred'].notnull()]
                 st.session_state['current_null_index'] = current_null_index
-                plot_scatter(df_to_show, incomplete_column, current_null_index)
+                plot_scatter(df_to_show, incomplete_column, reference_columns, current_null_index)
 
                 value = st.slider("", float(df_to_show[incomplete_column].min()), float(df_to_show[incomplete_column].max()),
                                   step=dataset_settings['precision'], key='my_slider',  on_change=update_point_color, args=[df_incomplete, incomplete_column])
