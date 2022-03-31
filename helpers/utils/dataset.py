@@ -30,10 +30,10 @@ def find_uncertain_y_indexes(X, n_clusters, fuzzy_certainty_thres=0.5):
     return indexes
 
 
-def save_results(y_pred_uncertain, seed, dataset_name, na_fraction):
+def save_results(values, seed, dataset_name, na_fraction):
     api.save_results(
         st.session_state["gsheet"],
-        y_pred_uncertain,
+        values,
         st.session_state['id'],
         seed,
         dataset_name,

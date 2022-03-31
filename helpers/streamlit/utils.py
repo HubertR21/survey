@@ -44,14 +44,14 @@ def calculate_y_pred_uncertain(df_incomplete, dataset_settings):
 
     uncertain_y_indexes = find_uncertain_y_indexes(X, dataset_settings['number_of_clusters'], fuzzy_certainty_thres=0.6)
     incomplete_indexes = df_incomplete[df_incomplete[dataset_settings['incomplete_column']].isnull()].index.tolist()
-    uncertain_incomplete_y_indexes = set(uncertain_y_indexes).intersection(incomplete_indexes)
-    y_pred_uncertain = [int(el) if i not in uncertain_incomplete_y_indexes else None for i, el in enumerate(y_pred)]
-    return X, y_pred_uncertain
+    border_points = list(set(uncertain_y_indexes).intersection(incomplete_indexes))
+
+    # y_pred_uncertain = [int(el) if i not in border_points else None for i, el in enumerate(y_pred)]
+    return X, y_pred, border_points
 
 
 def init_new_annotation_task(dataset_settings):
-    if 'dataset_generation_seed' not in st.session_state:
-        st.session_state['dataset_generation_seed'] = int(time.time())
+    st.session_state['dataset_generation_seed'] = int(time.time())
 
     incomplete_column = dataset_settings['incomplete_column']
     df_incomplete = generate_incomplete_dataset(st.session_state['dataset_generation_seed'],
@@ -59,9 +59,11 @@ def init_new_annotation_task(dataset_settings):
                                                 incomplete_column,
                                                 st.session_state.na_fraction_selectbox)
     update_session_state(*calculate_y_pred_uncertain(df_incomplete, dataset_settings))
-    st.session_state['annotator_error'] = 0
-    st.session_state['mean_error'] = 0
-    if None not in st.session_state['y_pred_uncertain']:
+    df_incomplete['y_pred'] = st.session_state['y_pred']
+    st.session_state['imputed_values'] = {}
+    st.session_state['annotated_points'] = 0
+
+    if not len(st.session_state["border_points"]):
         'Sorry, there are no border points to annotate. Choose other dataset or na_fraction.'
     else:
         st.session_state['started'] = True
