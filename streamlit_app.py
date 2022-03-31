@@ -3,9 +3,9 @@ import time
 
 from helpers.streamlit.callbacks import update_point_color
 from helpers.streamlit.utils import init_session_state, read_settings_from_file, validate, init_new_annotation_task
-from helpers.utils.dataset import add_projection_dimensions_to_df_incomplete
+from helpers.utils.dataset import add_projection_dimensions_to_df_incomplete, save_results, generate_incomplete_dataset
+from helpers.utils.imputation import impute_global_mean, impute_cluster_mean, impute_knn_mean, impute_cluster_knn_mean
 from helpers.utils.projections import projections_dict, plot_scatter
-
 
 
 def get_y_pred_uncertain_str():
@@ -44,18 +44,11 @@ else:
             df_incomplete = add_projection_dimensions_to_df_incomplete(str(projection_key),
                                                                        st.session_state.X,
                                                                        st.session_state.df_incomplete)
-
-            df_incomplete['y_pred'] = get_y_pred_uncertain_str()
-
-            df_null_indexes = df_incomplete[df_incomplete['y_pred'].isnull()].index.tolist()
-            n_of_points_to_annotate = len(df_null_indexes)
+            n_of_points_to_annotate = len(st.session_state['border_points'])
             if n_of_points_to_annotate > 0:
 
-                current_null_index = df_null_indexes[0]
+                current_null_index = st.session_state['border_points'][0]
 
-                cluster_labels = [el for el in df_incomplete['y_pred'].unique() if el is not None]
-
-                df_incomplete.at[current_null_index, 'y_pred'] = 'uncertain'
                 points_to_show_mask = df_incomplete[incomplete_column].notnull()
                 points_to_show_mask[current_null_index] = True
                 df_to_show = df_incomplete[points_to_show_mask]
@@ -66,17 +59,18 @@ else:
                 value = st.slider("", float(df_to_show[incomplete_column].min()), float(df_to_show[incomplete_column].max()),
                                   step=dataset_settings['precision'], key='my_slider',  on_change=update_point_color, args=[df_incomplete, incomplete_column])
 
-                f"Records to be labeled: {len(df_null_indexes)}"
+                f"Records to be labeled: {len(st.session_state['border_points'])}"
                 st.progress(
                     st.session_state['annotated_points'] / (
                             st.session_state['annotated_points'] + n_of_points_to_annotate))
 
                 if st.button('Submit'):
-                    real_value=st.session_state[f'ds_{dataset_settings["name"]}'].at[current_null_index, incomplete_column]
+                    st.session_state['imputed_values'][current_null_index] = value
+                    st.session_state['border_points'].pop(0)
+
+                    real_value = st.session_state[f'ds_{dataset_settings["name"]}'].at[current_null_index, incomplete_column]
                     st.session_state['annotator_error'] += abs(real_value - value)
                     st.session_state['mean_error'] += abs(real_value - df_incomplete[incomplete_column].mean())
-
-                    st.session_state['y_pred_uncertain'][current_null_index] = int(0) # fix this hack
                     st.session_state['annotated_points'] += 1
                     st.experimental_rerun()
                 if st.button('Cancel'):
@@ -86,22 +80,36 @@ else:
 
             else:
                 # Iteration finished
-                # save_results(st.session_state['y_pred_uncertain'],
-                #              st.session_state['dataset_generation_seed'],
-                #              dataset_name_selectbox,
-                #              na_fraction_selectbox)
+                # test = generate_incomplete_dataset(st.session_state['dataset_generation_seed'],
+                #                                 dataset_settings['name'],
+                #                                 incomplete_column,
+                #                                 st.session_state.na_fraction_selectbox)
+                global_means = impute_global_mean(df_incomplete, incomplete_column, st.session_state['imputed_values'].keys())
+                cluster_means = impute_cluster_mean(df_incomplete, incomplete_column,
+                                                  st.session_state['imputed_values'].keys())
+                knn = impute_knn_mean(df_incomplete, incomplete_column,
+                                                  st.session_state['imputed_values'].keys(), reference_columns)
+                cluster_knn = impute_cluster_knn_mean(df_incomplete, incomplete_column,
+                                         st.session_state['imputed_values'].keys(), reference_columns)
+
+                print(global_means, cluster_means, knn, cluster_knn)
                 print(f"Annotator error: {st.session_state['annotator_error']}")
                 print(f"Mean error: {st.session_state['mean_error']}")
+
                 f"Annotator error: {st.session_state['annotator_error']}"
                 f"Mean error: {st.session_state['mean_error']}"
-                if st.button("OK"):
-                    st.session_state['annotated_points'] = 0
+
+                if st.button("OK, SAVE RESULTS"):
                     st.session_state['started'] = False
-                    st.session_state['dataset_generation_seed'] = int(time.time())
-                    # st.success('Your answers have been saved')
+                    save_results(st.session_state['imputed_values'],
+                                 st.session_state['dataset_generation_seed'],
+                                 dataset_name_selectbox,
+                                 na_fraction_selectbox)
+
+                    st.success('Your answers have been saved')
                     st.balloons()
                     time.sleep(1)
-
                     st.experimental_rerun()
+
         except ValueError:
             st.error("Click START after changing the dataset to restart the annotation process")
