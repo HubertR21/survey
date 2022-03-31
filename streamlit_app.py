@@ -1,6 +1,7 @@
+import pandas as pd
 import streamlit as st
 import time
-
+from sklearn.metrics import mean_squared_error, mean_absolute_error
 from helpers.streamlit.callbacks import update_point_color
 from helpers.streamlit.utils import init_session_state, read_settings_from_file, validate, init_new_annotation_task
 from helpers.utils.dataset import add_projection_dimensions_to_df_incomplete, save_results, generate_incomplete_dataset
@@ -67,37 +68,30 @@ else:
                 if st.button('Submit'):
                     st.session_state['imputed_values'][current_null_index] = value
                     st.session_state['border_points'].pop(0)
-
-                    real_value = st.session_state[f'ds_{dataset_settings["name"]}'].at[current_null_index, incomplete_column]
-                    st.session_state['annotator_error'] += abs(real_value - value)
-                    st.session_state['mean_error'] += abs(real_value - df_incomplete[incomplete_column].mean())
                     st.session_state['annotated_points'] += 1
                     st.experimental_rerun()
+
                 if st.button('Cancel'):
-                    st.session_state['annotated_points'] = 0
                     st.session_state['started'] = False
                     st.experimental_rerun()
 
             else:
                 # Iteration finished
-                # test = generate_incomplete_dataset(st.session_state['dataset_generation_seed'],
-                #                                 dataset_settings['name'],
-                #                                 incomplete_column,
-                #                                 st.session_state.na_fraction_selectbox)
-                global_means = impute_global_mean(df_incomplete, incomplete_column, st.session_state['imputed_values'].keys())
-                cluster_means = impute_cluster_mean(df_incomplete, incomplete_column,
-                                                  st.session_state['imputed_values'].keys())
-                knn = impute_knn_mean(df_incomplete, incomplete_column,
-                                                  st.session_state['imputed_values'].keys(), reference_columns)
-                cluster_knn = impute_cluster_knn_mean(df_incomplete, incomplete_column,
-                                         st.session_state['imputed_values'].keys(), reference_columns)
+                na_indexes = list(st.session_state['imputed_values'].keys())
+                global_means = impute_global_mean(df_incomplete, incomplete_column, na_indexes)
+                cluster_means = impute_cluster_mean(df_incomplete, incomplete_column, na_indexes)
+                knn = impute_knn_mean(df_incomplete, incomplete_column, na_indexes, reference_columns)
+                cluster_knn = impute_cluster_knn_mean(df_incomplete, incomplete_column, na_indexes, reference_columns)
 
-                print(global_means, cluster_means, knn, cluster_knn)
-                print(f"Annotator error: {st.session_state['annotator_error']}")
-                print(f"Mean error: {st.session_state['mean_error']}")
+                real_values = st.session_state[f'ds_{dataset_settings["name"]}'][incomplete_column][na_indexes].tolist()
 
-                f"Annotator error: {st.session_state['annotator_error']}"
-                f"Mean error: {st.session_state['mean_error']}"
+                rows = ["Annotator", "Mean", "Cluster mean", "knn", "cluster knn"]
+                imputations = [st.session_state['imputed_values'], global_means, cluster_means, knn, cluster_knn]
+                MAE = [mean_absolute_error(list(imputation.values()), real_values) for imputation in imputations]
+                RMSE = [mean_squared_error(list(imputation.values()), real_values, squared=False) for imputation in imputations]
+                results = pd.DataFrame(MAE, columns=["MAE"], index=rows)
+                results["RMSE"] = RMSE
+                st.table(results)
 
                 if st.button("OK, SAVE RESULTS"):
                     st.session_state['started'] = False

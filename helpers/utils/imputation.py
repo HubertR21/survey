@@ -5,7 +5,6 @@ from sklearn.neighbors import NearestNeighbors
 def weighted_average(distribution, weights):
     numerator = sum([distribution[i] * weights[i] for i in range(len(distribution))])
     denominator = sum(weights)
-
     return round(numerator / denominator, 2)
 
 
@@ -14,9 +13,8 @@ def impute_global_mean(df, incomplete_column, na_indexes):
     return {idx: mean for idx in na_indexes}
 
 
-def impute_knn_mean_helper(df, na_indexes, reference_columns, incomplete_column, n_neighbors=5,
-                           weight_func=lambda x: 1):
-    not_na_mask = [x not in na_indexes for x in df[incomplete_column].index]
+def impute_knn_mean_helper(df, na_indexes, reference_columns, incomplete_column, n_neighbors=5, weight_func=lambda x: 1):
+    not_na_mask = df[incomplete_column].notna()
 
     if len(na_indexes) > 0:
         # performing KNN for each NA record
@@ -67,4 +65,4 @@ def impute_cluster_knn_mean(df, incomplete_column, na_indexes, reference_columns
         if res:
             values.update(res)
 
-    return values
+    return {idx: values[idx] for idx in na_indexes}

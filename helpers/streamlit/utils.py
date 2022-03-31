@@ -62,8 +62,6 @@ def init_new_annotation_task(dataset_settings):
     df_incomplete['y_pred'] = st.session_state['y_pred']
     st.session_state['imputed_values'] = {}
     st.session_state['annotated_points'] = 0
-    st.session_state['annotator_error'] = 0
-    st.session_state['mean_error'] = 0
 
     if not len(st.session_state["border_points"]):
         'Sorry, there are no border points to annotate. Choose other dataset or na_fraction.'
