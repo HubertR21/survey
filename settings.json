@@ -38,7 +38,7 @@
       "path": "",
       "precision": 0.01,
       "ignore": false,
-      "incomplete_column": "[Mn %]",
+      "incomplete_column": "[Mg %]",
       "target_column": "[LABELS]",
       "number_of_clusters": 3,
       "knn_number_of_neighbors": [
@@ -50,14 +50,12 @@
         "1/x**2"
       ],
       "reference_columns": [
+        "[Mn %]",
         "[C %]",
         "[Si %]",
-        "[P %]",
-        "[S %]",
         "[Cr %]",
         "[Ni %]",
-        "[Cu %]",
-        "[Mg %]"
+        "[Cu %]"
       ],
       "categorical_columns": []
     },
