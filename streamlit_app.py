@@ -29,7 +29,7 @@ else:
     with st.sidebar:
         st.markdown('## Settings')
         dataset_name_selectbox = st.selectbox('Select dataset', [dataset['name'] for dataset in datasets_settings])
-        na_fraction_selectbox = st.selectbox('Select na_fraction', [0.05, 0.1, 0.15, 0.2, 0.25, 0.3], key="na_fraction_selectbox")
+        na_fraction_selectbox = st.selectbox('Select na_fraction', [0.1, 0.2, 0.3], key="na_fraction_selectbox")
 
     dataset_settings = next(dataset for dataset in datasets_settings if dataset['name'] == dataset_name_selectbox)
     incomplete_column = dataset_settings['incomplete_column']

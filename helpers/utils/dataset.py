@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 from helpers.utils.fuzzy import fuzzy_kmeans_fit_predict
+from helpers.utils.imputation import impute_knn_mean
 from helpers.utils.projections import projections_dict
 from helpers.drive import api
 
@@ -27,6 +28,14 @@ def find_uncertain_y_indexes(X, n_clusters, fuzzy_certainty_thres=0.5):
     max_labels = fuzzy_labels.max(axis=1)
     filter_indexes = max_labels < fuzzy_certainty_thres
     indexes = [ind for ind, element in enumerate(filter_indexes) if element == True]
+    return indexes
+
+@st.cache
+def find_uncertain_y_indexes(df_incomplete, dataset_settings, na_indexes):
+    incomplete_column = dataset_settings['incomplete_column']
+    knn = impute_knn_mean(df_incomplete, incomplete_column, na_indexes, dataset_settings['reference_columns'])
+    real_values = st.session_state[f'ds_{dataset_settings["name"]}'][incomplete_column][na_indexes].tolist()
+    indexes = abs(pd.Series(knn) - real_values).sort_values().index.tolist()[-15:]
     return indexes
 
 

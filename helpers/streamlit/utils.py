@@ -42,11 +42,11 @@ def calculate_y_pred_uncertain(df_incomplete, dataset_settings):
     kmeans.fit(X)
     y_pred = kmeans.predict(X)
 
-    uncertain_y_indexes = find_uncertain_y_indexes(X, dataset_settings['number_of_clusters'], fuzzy_certainty_thres=0.6)
     incomplete_indexes = df_incomplete[df_incomplete[dataset_settings['incomplete_column']].isnull()].index.tolist()
+    uncertain_y_indexes = find_uncertain_y_indexes(df_incomplete, dataset_settings, incomplete_indexes)
+
     border_points = list(set(uncertain_y_indexes).intersection(incomplete_indexes))
 
-    # y_pred_uncertain = [int(el) if i not in border_points else None for i, el in enumerate(y_pred)]
     return X, y_pred, border_points
 
 
@@ -64,7 +64,7 @@ def init_new_annotation_task(dataset_settings):
     st.session_state['annotated_points'] = 0
 
     if not len(st.session_state["border_points"]):
-        'Sorry, there are no border points to annotate. Choose other dataset or na_fraction.'
+        st.text('Sorry, there are no border points to annotate. Choose other dataset or na_fraction.')
     else:
         st.session_state['started'] = True
     return df_incomplete
