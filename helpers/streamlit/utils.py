@@ -36,7 +36,8 @@ def init_session_state(datasets_settings):
 
 
 def calculate_y_pred_uncertain(df_incomplete, dataset_settings):
-    X = df_incomplete[dataset_settings['reference_columns']].values
+    X = df_incomplete[dataset_settings['reference_columns']]
+    X = X.apply(lambda x: x / x.max(), axis=0).values
 
     kmeans = KMeans(n_clusters=dataset_settings['number_of_clusters'], random_state=0)
     kmeans.fit(X)
