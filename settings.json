@@ -36,7 +36,7 @@
     {
       "name": "wola",
       "path": "",
-      "precision": 0.01,
+      "precision": 0.001,
       "ignore": false,
       "incomplete_column": "[Mg %]",
       "target_column": "[LABELS]",

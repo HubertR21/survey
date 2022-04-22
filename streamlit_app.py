@@ -57,8 +57,10 @@ else:
                 st.session_state['current_null_index'] = current_null_index
                 plot_scatter(df_to_show, incomplete_column, reference_columns, current_null_index)
 
-                value = st.slider("", float(df_to_show[incomplete_column].min()), float(df_to_show[incomplete_column].max()),
-                                  step=dataset_settings['precision'], key='my_slider',  on_change=update_point_color, args=[df_incomplete, incomplete_column])
+                value = st.slider("",  st.session_state['min_value'] - 3*dataset_settings['precision'],
+                                  st.session_state['max_value'] + 3*dataset_settings['precision'],
+                                  step=dataset_settings['precision'], key='my_slider',  format='%.3f',
+                                  on_change=update_point_color, args=[df_incomplete, incomplete_column])
 
                 f"Records to be labeled: {len(st.session_state['border_points'])}"
                 st.progress(
