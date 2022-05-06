@@ -3,6 +3,7 @@ from sklearn.manifold import TSNE
 from sklearn.decomposition import PCA
 import streamlit as st
 import plotly.express as px
+import pandas as pd
 
 
 @st.cache
@@ -33,34 +34,50 @@ projections_dict = {
 }
 
 
-def plot_scatter(df, incomplete_column, reference_columns, current_null_index):
+def plot_scatter(df, incomplete_column, reference_columns, current_null_index, slider_values):
     uncertain_x, uncertain_y = df[['x', 'y']].loc[current_null_index]
-
     hover_data = {'x': False, 'y': False, incomplete_column: ':.3f'}
     hover_data.update({col: True for col in df[reference_columns].columns})
-
-    fig = px.scatter(df, x="x", y="y",
+    x_std = df['x'].std()
+    y_std = df['y'].std()
+    trace_points = px.scatter(df[~df[incomplete_column].isna()], x="x", y="y",
                      color=incomplete_column,
                      color_continuous_scale=px.colors.sequential.Inferno,
-                     # symbol="y_pred",
-                     # symbol_sequence=["circle", "square", "diamond", "cross", "triangle-up", "triangle-down",
-                     #                  "pentagon", "circle-cross", "square-cross", "diamond-cross"],
                      symbol_map={"uncertain": "x"},
-                     # text='y_pred',
                      hover_data=hover_data,
-                     range_x=[uncertain_x - df['x'].std(), uncertain_x + df['x'].std()],
-                     range_y=[uncertain_y - df['y'].std(), uncertain_y + df['y'].std()],
+                     range_x=[uncertain_x - x_std, uncertain_x + x_std],
+                     range_y=[uncertain_y - y_std, uncertain_y + y_std],
                      # hover_name=target_column,
                      height=600,
                      width=800
                      )
+
+    single_point = df.loc[[current_null_index]].copy(deep=True)
+    single_point = pd.concat([single_point] * len(slider_values), ignore_index=True)
+    single_point[incomplete_column] = slider_values
+    trace_annotation = px.scatter(single_point, x="x", y="y",
+                     color=incomplete_column,
+                     animation_frame=incomplete_column,
+                     symbol_map={"uncertain": "x"},
+                     range_x=[uncertain_x - x_std, uncertain_x + x_std],
+                     range_y=[uncertain_y - y_std, uncertain_y + y_std],
+                     hover_data=hover_data,
+                     height=600,
+                     width=800
+                    )
+    fig=trace_annotation
+    fig.add_traces(trace_points.data[0])
+
     fig.update_traces(textposition='top center', textfont_size=8,
                       textfont_color="#636363", marker_size=12
                       )
+    fig.layout.pop("updatemenus")
+
 
     fig.layout.showlegend = False
     # fig.update_layout(hovermode="incomplete_column")
     add_annotation(fig, uncertain_x, uncertain_y)
+    st.session_state['fig'] = fig
     scatter = st.plotly_chart(fig, key="scatter")
 
 

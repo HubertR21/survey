@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import streamlit as st
 import time
 from sklearn.metrics import mean_squared_error, mean_absolute_error
@@ -17,7 +18,6 @@ st.set_page_config(layout="wide")
 st.sidebar.markdown('## Authorization')
 user_id = st.sidebar.text_input('Your ID')
 user_password = st.sidebar.text_input('Password', type="password")
-
 
 if not validate(user_id) or not user_password == st.secrets['password']:
     '# Please authorize'
@@ -55,12 +55,18 @@ else:
                 df_to_show = df_incomplete[points_to_show_mask]
 
                 st.session_state['current_null_index'] = current_null_index
-                plot_scatter(df_to_show, incomplete_column, reference_columns, current_null_index)
+                slider_values = np.around(np.arange(
+                    st.session_state['min_value'] - 3 * dataset_settings['precision'],
+                    st.session_state['max_value'] + 3 * dataset_settings['precision'],
+                    step=dataset_settings['precision']),
+                    3).tolist()
+                plot_scatter(df_to_show, incomplete_column, reference_columns, current_null_index, slider_values)
 
-                value = st.slider("",  st.session_state['min_value'] - 3*dataset_settings['precision'],
-                                  st.session_state['max_value'] + 3*dataset_settings['precision'],
-                                  step=dataset_settings['precision'], key='my_slider',  format='%.3f',
-                                  on_change=update_point_color, args=[df_incomplete, incomplete_column])
+                'You may experiment with different values on progress bar above.'
+                'Finally, select the proposed value on the slider below and click SUBMIT.'
+                value = st.slider("", st.session_state['min_value'] - 3 * dataset_settings['precision'],
+                                  st.session_state['max_value'] + 3 * dataset_settings['precision'],
+                                  step=dataset_settings['precision'], key='my_slider', format='%.3f', args=[df_incomplete, incomplete_column])
 
                 f"Records to be labeled: {len(st.session_state['border_points'])}"
                 st.progress(
@@ -90,7 +96,8 @@ else:
                 rows = ["Annotator", "Mean", "Cluster mean", "knn", "cluster knn"]
                 imputations = [st.session_state['imputed_values'], global_means, cluster_means, knn, cluster_knn]
                 MAE = [mean_absolute_error(list(imputation.values()), real_values) for imputation in imputations]
-                RMSE = [mean_squared_error(list(imputation.values()), real_values, squared=False) for imputation in imputations]
+                RMSE = [mean_squared_error(list(imputation.values()), real_values, squared=False) for imputation in
+                        imputations]
                 results = pd.DataFrame(MAE, columns=["MAE"], index=rows)
                 results["RMSE"] = RMSE
                 st.table(results)
