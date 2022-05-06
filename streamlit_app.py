@@ -62,7 +62,7 @@ else:
                     3).tolist()
                 plot_scatter(df_to_show, incomplete_column, reference_columns, current_null_index, slider_values)
 
-                'You may experiment with different values on progress bar above.'
+                'You may experiment with different values on the chart slider above.'
                 'Finally, select the proposed value on the slider below and click SUBMIT.'
                 value = st.slider("", st.session_state['min_value'] - 3 * dataset_settings['precision'],
                                   st.session_state['max_value'] + 3 * dataset_settings['precision'],
