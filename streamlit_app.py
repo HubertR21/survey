@@ -70,7 +70,7 @@ else:
                 plot_scatter(df_to_show, incomplete_column, reference_columns, current_null_index, slider_values)
 
 
-                col1, col2, col3 = st.columns((1,3, 5))
+                col0, col1, col2, col3 = st.columns((1,1,5, 4))
 
                 with col1:
                     "Finally, write the selected value and click SUBMIT."
@@ -120,5 +120,5 @@ else:
                     time.sleep(1)
                     st.experimental_rerun()
 
-        except ValueError:
+        except (ValueError, KeyError):
             st.error("Click START after changing the dataset to restart the annotation process")
