@@ -63,10 +63,10 @@ else:
                 plot_scatter(df_to_show, incomplete_column, reference_columns, current_null_index, slider_values)
 
                 'You may experiment with different values on the chart slider above.'
-                'Finally, select the proposed value on the slider below and click SUBMIT.'
-                value = st.slider("", st.session_state['min_value'] - 3 * dataset_settings['precision'],
+                'Finally, write the proposed value below and click SUBMIT.'
+                value = st.number_input("", st.session_state['min_value'] - 3 * dataset_settings['precision'],
                                   st.session_state['max_value'] + 3 * dataset_settings['precision'],
-                                  step=dataset_settings['precision'], key='my_slider', format='%.3f', args=[df_incomplete, incomplete_column])
+                                  step=dataset_settings['precision'], key='numerical_input', format='%.3f', args=[df_incomplete, incomplete_column])
 
                 f"Records to be labeled: {len(st.session_state['border_points'])}"
                 st.progress(

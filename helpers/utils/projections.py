@@ -43,6 +43,7 @@ def plot_scatter(df, incomplete_column, reference_columns, current_null_index, s
     trace_points = px.scatter(df[~df[incomplete_column].isna()], x="x", y="y",
                      color=incomplete_column,
                      color_continuous_scale=px.colors.sequential.Inferno,
+                     range_color=(0, 1),
                      symbol_map={"uncertain": "x"},
                      hover_data=hover_data,
                      range_x=[uncertain_x - x_std, uncertain_x + x_std],
