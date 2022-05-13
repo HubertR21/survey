@@ -5,7 +5,6 @@ import streamlit as st
 import plotly.express as px
 import pandas as pd
 
-
 @st.cache
 def perform_pca_projection(X):
     tsne = PCA(n_components=2, random_state=0)
@@ -40,10 +39,12 @@ def plot_scatter(df, incomplete_column, reference_columns, current_null_index, s
     hover_data.update({col: True for col in df[reference_columns].columns})
     x_std = df['x'].std()
     y_std = df['y'].std()
+    min_value = min(slider_values)
+    max_value = max(slider_values)
     trace_points = px.scatter(df[~df[incomplete_column].isna()], x="x", y="y",
                      color=incomplete_column,
                      color_continuous_scale=px.colors.sequential.Inferno,
-                     range_color=(df[incomplete_column].min(), df[incomplete_column].max()),
+                     range_color=(min_value, max_value),
                      symbol_map={"uncertain": "x"},
                      hover_data=hover_data,
                      range_x=[uncertain_x - x_std, uncertain_x + x_std],
@@ -60,7 +61,7 @@ def plot_scatter(df, incomplete_column, reference_columns, current_null_index, s
                      color=incomplete_column,
                      animation_frame=incomplete_column,
                      color_continuous_scale=px.colors.sequential.Inferno,
-                     range_color=(df[incomplete_column].min(), df[incomplete_column].max()),
+                     range_color=(min_value, max_value),
                      symbol_map={"uncertain": "x"},
                      range_x=[uncertain_x - x_std, uncertain_x + x_std],
                      range_y=[uncertain_y - y_std, uncertain_y + y_std],
@@ -68,8 +69,8 @@ def plot_scatter(df, incomplete_column, reference_columns, current_null_index, s
                      height=600,
                      width=800
                     )
-    fig=trace_annotation
-    fig.add_traces(trace_points.data[0])
+    fig = trace_annotation
+    fig.add_traces(trace_points.data)
 
     fig.update_traces(textposition='top center', textfont_size=8,
                       textfont_color="#636363", marker_size=12
@@ -80,7 +81,7 @@ def plot_scatter(df, incomplete_column, reference_columns, current_null_index, s
     fig.layout.showlegend = False
     # fig.update_layout(hovermode="incomplete_column")
     add_annotation(fig, uncertain_x, uncertain_y)
-    st.session_state['fig'] = fig
+
     scatter = st.plotly_chart(fig, key="scatter")
 
 

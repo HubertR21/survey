@@ -60,28 +60,34 @@ else:
                     st.session_state['max_value'] + 3 * dataset_settings['precision'],
                     step=dataset_settings['precision']),
                     3).tolist()
-                plot_scatter(df_to_show, incomplete_column, reference_columns, current_null_index, slider_values)
-
-                'You may experiment with different values on the chart slider above.'
-                'Finally, write the proposed value below and click SUBMIT.'
-                value = st.number_input("", st.session_state['min_value'] - 3 * dataset_settings['precision'],
-                                  st.session_state['max_value'] + 3 * dataset_settings['precision'],
-                                  step=dataset_settings['precision'], key='numerical_input', format='%.3f', args=[df_incomplete, incomplete_column])
 
                 f"Records to be labeled: {len(st.session_state['border_points'])}"
                 st.progress(
                     st.session_state['annotated_points'] / (
                             st.session_state['annotated_points'] + n_of_points_to_annotate))
 
-                if st.button('Submit'):
-                    st.session_state['imputed_values'][current_null_index] = value
-                    st.session_state['border_points'].pop(0)
-                    st.session_state['annotated_points'] += 1
-                    st.experimental_rerun()
+                'You may experiment with different values on the chart slider below.'
+                plot_scatter(df_to_show, incomplete_column, reference_columns, current_null_index, slider_values)
 
-                if st.button('Cancel'):
-                    st.session_state['started'] = False
-                    st.experimental_rerun()
+
+                col0, col1, col2, col3 = st.columns((1,1,5, 4))
+
+                with col1:
+                    "Finally, write the selected value and click SUBMIT."
+                with col2:
+                    value = st.number_input("", st.session_state['min_value'] - 3 * dataset_settings['precision'],
+                                      st.session_state['max_value'] + 3 * dataset_settings['precision'],
+                                      step=dataset_settings['precision'], key='numerical_input', format='%.3f',
+                                            args=[df_incomplete, incomplete_column])
+                with col3:
+                    if st.button('Submit'):
+                        st.session_state['imputed_values'][current_null_index] = value
+                        st.session_state['border_points'].pop(0)
+                        st.session_state['annotated_points'] += 1
+                        st.experimental_rerun()
+                    if st.button('Cancel'):
+                        st.session_state['started'] = False
+                        st.experimental_rerun()
 
             else:
                 # Iteration finished
@@ -114,5 +120,5 @@ else:
                     time.sleep(1)
                     st.experimental_rerun()
 
-        except ValueError:
+        except (ValueError, KeyError):
             st.error("Click START after changing the dataset to restart the annotation process")
