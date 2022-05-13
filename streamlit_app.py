@@ -26,6 +26,8 @@ else:
     datasets_settings = read_settings_from_file()
     init_session_state(datasets_settings)
 
+    with st.expander("INSTRUCTION"):
+        st.video("https://www.youtube.com/watch?v=YcGcMBnQ0I4")
     with st.sidebar:
         st.markdown('## Settings')
         dataset_name_selectbox = st.selectbox('Select dataset', [dataset['name'] for dataset in datasets_settings])
