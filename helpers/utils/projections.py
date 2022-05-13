@@ -27,9 +27,9 @@ def perform_tsne_projection(X):
 
 
 projections_dict = {
+    "tsne": perform_tsne_projection,
     "pca": perform_pca_projection,
     "umap": perform_umap_projection,
-    "tsne": perform_tsne_projection,
 }
 
 
