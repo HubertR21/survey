@@ -132,7 +132,8 @@ else:
                                  cluster_knn,
                                  st.session_state['dataset_generation_seed'],
                                  dataset_name_selectbox,
-                                 na_fraction_selectbox)
+                                 na_fraction_selectbox,
+                                 projection_key)
 
                     st.success('Your answers have been saved')
                     st.balloons()

@@ -65,7 +65,7 @@ def download_datasets(g, names):
         st.session_state[f'ds_{name}'] = df
 
 
-def save_results(g, human_imputation, mean_imputation, cluster_mean_imputation, knn_imputation, cluster_knn_imputation, annotator_id, seed, dataset_name, na_fraction):
+def save_results(g, human_imputation, mean_imputation, cluster_mean_imputation, knn_imputation, cluster_knn_imputation, annotator_id, seed, dataset_name, na_fraction, projection_key):
     """
     Saves the imputation results to a Google Sheets worksheet.
 
@@ -80,6 +80,7 @@ def save_results(g, human_imputation, mean_imputation, cluster_mean_imputation, 
         seed (int): The random seed used for imputation.
         dataset_name (str): The name of the dataset.
         na_fraction (float): The fraction of missing values in the dataset.
+        projection_key (str): The key of the projection used for the imputation.
 
     Returns:
         None
@@ -96,6 +97,7 @@ def save_results(g, human_imputation, mean_imputation, cluster_mean_imputation, 
         annotator_id,
         seed,
         na_fraction,
+        projection_key,
         str(human_imputation),
         str(mean_imputation),
         str(cluster_mean_imputation),

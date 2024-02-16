@@ -40,7 +40,7 @@ def find_uncertain_y_indexes(df_incomplete, dataset_settings, na_indexes):
     return indexes
 
 
-def save_results(human_imputation, mean_imputation, cluster_mean_imputation, knn_imputation, cluster_knn_imputation, seed, dataset_name, na_fraction):
+def save_results(human_imputation, mean_imputation, cluster_mean_imputation, knn_imputation, cluster_knn_imputation, seed, dataset_name, na_fraction, projection_key):
     """
     Save the imputation results to a Google Sheet using the API.
 
@@ -56,6 +56,7 @@ def save_results(human_imputation, mean_imputation, cluster_mean_imputation, knn
     - seed (int): The random seed used for imputation.
     - dataset_name (str): The name of the dataset.
     - na_fraction (float): The fraction of missing values in the dataset.
+    - projection_key (str): The key of the projection used for the imputation.
 
     Returns:
     None
@@ -70,5 +71,6 @@ def save_results(human_imputation, mean_imputation, cluster_mean_imputation, knn
         st.session_state['id'],
         seed,
         dataset_name,
-        na_fraction
+        na_fraction,
+        projection_key
     )
