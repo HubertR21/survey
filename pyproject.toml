@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "022_data_imputation"
+name = "survey"
 version = "0.1.0"
 description = ""
 authors = ["Your Name <you@example.com>"]
