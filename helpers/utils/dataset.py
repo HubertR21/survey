@@ -36,7 +36,7 @@ def find_uncertain_y_indexes(df_incomplete, dataset_settings, na_indexes):
     knn               = impute_knn_mean(df_incomplete, incomplete_column, na_indexes, dataset_settings['reference_columns'])
     real_values       = st.session_state[f'ds_{dataset_settings["name"]}'][incomplete_column][na_indexes].tolist()
     # For testing, I recommend changing the number of indexes to be returned (Default: 15).
-    indexes           = abs(pd.Series(knn) - real_values).sort_values().index.tolist()[-2:] 
+    indexes           = abs(pd.Series(knn) - real_values).sort_values().index.tolist()[-15:] 
     return indexes
 
 
