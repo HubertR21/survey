@@ -124,10 +124,10 @@ for i in range(wola_result.shape[0]):
     fraction = wola_result.iloc[i,3]
     print('Seed:', seed, 'Fraction:', fraction)
     init_session_state(datasets_settings)
+    dataset_name_selectbox = 'wola'
     dataset_settings = next(dataset for dataset in datasets_settings if dataset['name'] == dataset_name_selectbox)
     incomplete_column = dataset_settings['incomplete_column']
     reference_columns = dataset_settings['reference_columns']
-    dataset_name_selectbox = 'wola'
     df_incomplete = init_annotation_task(dataset_settings, seed = seed, fraction = fraction)
     st.session_state.df_incomplete = df_incomplete
     incomplete_column = dataset_settings['incomplete_column']
